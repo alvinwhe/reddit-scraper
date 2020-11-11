@@ -20,11 +20,11 @@ if (process.argv[2] == "-n"){
     reqNumPosts = 50;
 }
 
+let allPosts = [];
+
 (async () => {
     const browser = await puppeteer.launch(/*{headless:false}*/);
     const page = await browser.newPage();
-
-    let allPosts = [];
 
     for (let i = 0; i < inputs.length; i++){
         await page.goto(functions.reddit_url(inputs[i]), {waitUntil: "networkidle0"});
@@ -86,3 +86,15 @@ if (process.argv[2] == "-n"){
     console.log(allPosts.length);
     await browser.close();
   })();
+
+const express = require('express')
+const app = express()
+const port = 9000
+
+app.get('/', (req, res) => {
+  res.send(allPosts);
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
