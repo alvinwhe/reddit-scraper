@@ -2,28 +2,14 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req, res, next) {
+    console.log("Received GET request at /")
     const puppeteer = require('puppeteer');
     const functions = require('../../functions');
-
-    // if (process.argv.length < 3 || (process.argv[2] == "-n" && process.argv.length < 5)){
-    //     console.log("Usage: ./scraping.js [-n numberPosts] subreddit [subreddit2] [...]\n" +
-    //                 "-n number of posts you want to scrape per subreddit, defaulted to 50" 
-    //                 );
-    //     process.exit(0);
-    // } 
 
     let inputs = ["manga"];
 
     /* how many update posts we want to scrape at a time */
-    let reqNumPosts = 10;
-
-    // if (process.argv[2] == "-n"){
-    //     inputs = process.argv.slice(4,process.argv.length);
-    //     reqNumPosts = process.argv[3];
-    // } else {
-    //     inputs = process.argv.slice(2,process.argv.length);
-    //     reqNumPosts = 50;
-    // }
+    let reqNumPosts = 100;
 
     let allPosts = [];
 
@@ -62,29 +48,34 @@ router.get('/', function(req, res, next) {
                         /* all chapters will have [DISC] in the name */
                         continue;
                     }
+                    
                     let url = await posts[postNum].$eval("a[class *= 'title may-blank']", post => post.getAttribute("href"));
+                    if (url.indexOf('/r/manga') != "-1"){
+                        url = "www.reddit.com" + url;
+                    }
                     let upvotes = await posts[postNum].$eval("div[class *= 'score unvoted']", post => post.innerHTML);
                     if (upvotes == "•"){
-                        upvotes = "unknown";
+                        let commentLink = await posts[postNum].$eval("a[class *= 'bylink comment']", post => post.getAttribute("href"));
+                        let tmptab = await browser.newPage();
+                        await tmptab.goto(commentLink,{waitUntil: "networkidle0"});
+                        upvotes = await tmptab.$eval("span[class = 'number']", post => post.innerHTML);
+                        await tmptab.close();
                     }
-                    let comments = await posts[postNum].$eval("a[class *= 'bylink comment']", post => post.innerHTML.split(' ')[0]);
-                    if (comments == "comment"){
-                        comments = "0";
-                    }
+
                     let thumbnail;
                     try{
                         thumbnail = await posts[postNum].$eval("a[class *= 'thumbnail invisible'] > img", post => post.getAttribute("src"));
                     } catch {
-                        thumbnail = "none";
+                        thumbnail = await posts[postNum].$eval("a[class *= 'thumbnail invisible']", post => window.getComputedStyle(post).getPropertyValue('background-image'));
+                        thumbnail = thumbnail.slice(5,-2);
                     }
-                    let subreddit = inputs[i];
+                    let time = await posts[postNum].$eval("p[class*='tagline'] > time", post => post.innerHTML);
                     countPosts.push({
-                        // subreddit,
                         title,
                         url, 
                         thumbnail,
-                        upvotes
-                        // comments
+                        upvotes,
+                        time
                     })
                     console.log("pushed to count");
                 }
@@ -97,8 +88,6 @@ router.get('/', function(req, res, next) {
             countPosts = countPosts.slice(0,reqNumPosts);
             allPosts = allPosts.concat(countPosts);
         }
-        // console.log(allPosts);
-        // console.log(allPosts.length);
         await browser.close();
         res.send(allPosts);
     })();

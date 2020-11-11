@@ -29,7 +29,8 @@ class App extends Component {
                 <tr key={x.title}>
                   <td> <img src ={x.thumbnail} width='50px' height='50px'/> </td> 
                   <td> {x.upvotes} </td> 
-                  <td> <a href={x.url}> {x.title} </a> </td>
+                  <td> <a href={x.url} target='_blank' max-width='70%'> {x.title} </a> </td>
+                  <td> {x.time} </td>
                 </tr>)}
               </tbody>
             </table>
