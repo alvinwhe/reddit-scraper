@@ -1,4 +1,4 @@
-!reactapp/App.js
+!reactapp/src/App.js
 !expressapp/routes/scraper.js
 !expressapp/app.js
 !expressapp/bin/www
