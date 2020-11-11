@@ -13,6 +13,8 @@ router.get('/', function(req, res, next) {
     // } 
 
     let inputs = ["manga"];
+
+    /* how many update posts we want to scrape at a time */
     let reqNumPosts = 10;
 
     // if (process.argv[2] == "-n"){
@@ -52,7 +54,7 @@ router.get('/', function(req, res, next) {
             while (countPosts.length < reqNumPosts){ 
                 for( postNum in posts){
                     if(await posts[postNum].evaluate(post => post.getAttribute("data-promoted"),posts[postNum]) == "true"){
-                        console.log("found ad, skipping");
+                        /* skip any ad elements since they are identified as posts */
                         continue;
                     }
                     let title = await posts[postNum].$eval("a[class *= 'title may-blank']", post => post.innerHTML);
@@ -95,8 +97,8 @@ router.get('/', function(req, res, next) {
             countPosts = countPosts.slice(0,reqNumPosts);
             allPosts = allPosts.concat(countPosts);
         }
-        console.log(allPosts);
-        console.log(allPosts.length);
+        // console.log(allPosts);
+        // console.log(allPosts.length);
         await browser.close();
         res.send(allPosts);
     })();
