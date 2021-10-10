@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
     let inputs = ["manga"];
 
     /* how many update posts we want to scrape at a time */
-    let reqNumPosts = 100;
+    let reqNumPosts = 50;
 
     let allPosts = [];
 
@@ -48,7 +48,7 @@ router.get('/', function(req, res, next) {
                         /* all chapters will have [DISC] in the name */
                         continue;
                     }
-                    
+                    title = title.replace("[DISC]", "");
                     let url = await posts[postNum].$eval("a[class *= 'title may-blank']", post => post.getAttribute("href"));
                     if (url.indexOf('/r/manga') != "-1"){
                         url = "www.reddit.com" + url;
