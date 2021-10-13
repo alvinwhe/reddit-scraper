@@ -1,5 +1,6 @@
 # Reddit-Scraper
 Scrapes the r/manga subreddit to pull recent manga updates and display in a searchable table.
+Manga is essentially japanese comics that often require translations and are grouped into the subreddit as new chapters are released.
 
 ## How it works
 
